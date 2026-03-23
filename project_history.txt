@@ -1,0 +1,66 @@
+    1  ip link
+    2  nmcli con mod ens3 ipv4.addresses 192.168.1.100/24
+    3  nmcli con show
+    4  nmcli con mod "Wired connection 1" ipv4.addresses 192.168.1.100/24
+    5  nmcli con mod "Wired connection 1" ipv4.gateway 192.168.1.1
+    6  nmcli con mod "Wired connection 1" ipv4.dns 8.8.8.8
+    7  nmcli con mod "Wired connection 1" ipv4.method manual
+    8  nmcli con up "Wired connection 1"
+    9  hostnamectl set-hostname mephi-2026.domain.local
+   10  ip route
+   11  ping -c 4 8.8.8.8
+   12  ping -c 4 192.168.1.1
+   13  nmcli con mod "Wired connection 1" ipv4.method auto
+   14  nmcli con mod "Wired connection 1" ipv4.addresses ""
+   15  nmcli con mod "Wired connection 1" ipv4.gateway ""
+   16  nmcli con up "Wired connection 1"
+   17  ping -c 2 8.8.8.8
+   18  dnf install -y nginx tcpdump libcap-ng-utils
+   19  dnf download tcpdump --destdir /tmp
+   20  rpm -ivh --force /tmp/tcpdump-*.rpm
+   21  lsblk
+   22  echo -e 'n\np\n1\n\n\nw' | fdisk /dev/sdb
+   23  mkfs.ext4 -L MEPHI_DATA /dev/sdb1
+   24  mkdir -p /data/mephi-web
+   25  echo 'LABEL=MEPHI_DATA /data/mephi-web ext4 defaults 0 2' >> /etc/fstab
+   26  mount -a
+   27  systemctl daemon-reload
+   28  df -h /data/mephi-web
+   29  systemctl enable --now nginx
+   30  journalctl -u nginx --since "5 minutes ago" > /tmp/nginx_recent_logs.txt
+   31  cat /tmp/nginx_recent_logs.txt
+   32  useradd mephi-admin
+   33  echo 'P@ssw0rd2026' | passwd --stdin mephi-admin
+   34  groupadd mephi-devs
+   35  usermod -aG mephi-devs mephi-admin
+   36  chown mephi-admin:mephi-devs /data/mephi-web
+   37  chmod 2775 /data/mephi-web
+   38  getenforce
+   39  semanage fcontext -a -t httpd_sys_content_t "/data/mephi-web(/.*)?"
+   40  restorecon -Rv /data/mephi-web
+   41  chmod u-s /usr/sbin/tcpdump
+   42  setcap 'cap_net_raw,cap_net_admin+ep' /usr/sbin/tcpdump
+   43  getcap /usr/sbin/tcpdump
+   44  sudo -u mephi-admin tcpdump --help
+   45  echo root > /etc/denied_users
+   46  echo "auth required pam_listfile.so item=user sense=deny file=/etc/denied_users onerr=succeed" >> /etc/pam.d/password-auth
+   47  echo "auth required pam_listfile.so item=user sense=deny file=/etc/denied_users onerr=succeed" >> /etc/pam.d/sshd
+   48  echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+   49  systemctl restart sshd
+   50  sed -i 's|root /usr/share/nginx/html;|root /data/mephi-web;|' /etc/nginx/nginx.conf
+   51  nginx -t
+   52  systemctl restart nginx
+   53  sudo -u mephi-admin bash -c 'echo "Hello from Student: 368619" > /data/mephi-web/index.html'
+   54  curl http://localhost
+   55  grep -n 'root' /etc/nginx/nginx.conf
+   56  sed -i '41s|root         /usr/share/nginx/html;|root         /data/mephi-web;|' /etc/nginx/nginx.conf
+   57  nginx -t && systemctl restart nginx
+   58  curl http://localhost
+   59  nmcli con mod "Wired connection 1" ipv4.addresses 192.168.1.100/24
+   60  nmcli con mod "Wired connection 1" ipv4.gateway 192.168.1.1
+   61  nmcli con mod "Wired connection 1" ipv4.dns 8.8.8.8
+   62  nmcli con mod "Wired connection 1" ipv4.method manual
+   63  nmcli con up "Wired connection 1"
+   64  ping -c 4 8.8.8.8 > /tmp/network_check.txt 2>&1
+   65  ping -c 4 192.168.1.1 >> /tmp/network_check.txt 2>&1
+   66  history > ~/project_history.txt

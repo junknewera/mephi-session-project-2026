@@ -1,0 +1,4 @@
+/dev/systemVG/LVRoot / xfs defaults 0 1
+UUID=cba8919c-8ea2-4b34-a06a-dcf541fa3857 /boot xfs defaults 0 0
+UUID=870F-DFC4 /boot/efi vfat defaults,umask=0077,shortname=winnt 0 0
+LABEL=MEPHI_DATA /data/mephi-web ext4 defaults 0 2
